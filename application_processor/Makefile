@@ -419,9 +419,17 @@ ifeq "$(MAKECMDGOALS)" ""
 MAKECMDGOALS:=$(.DEFAULT_GOAL)
 endif
 
+hash_secrets:
+    $(eval AP_PIN_VALUE := $(shell grep 'define AP_PIN' inc/ectf_params.h | cut -d' ' -f3))
+    $(eval AP_TOKEN_VALUE := $(shell grep 'define AP_TOKEN' inc/ectf_params.h | cut -d' ' -f3))
+    $(eval AP_PIN_HASH := $(shell echo -n $(AP_PIN_VALUE) | openssl dgst -sha256 | cut -d' ' -f2))
+    $(eval AP_TOKEN_HASH := $(shell echo -n $(AP_TOKEN_VALUE) | openssl dgst -sha256 | cut -d' ' -f2))
+    @echo AP_PIN_HASH: $(AP_PIN_HASH)
+    @echo AP_TOKEN_HASH: $(AP_TOKEN_HASH)
 
 all:
 # 	Extend the functionality of the "all" recipe here
+        hash_secrets
 	arm-none-eabi-size --format=berkeley $(BUILD_DIR)/$(PROJECT).elf
 
 libclean: 
